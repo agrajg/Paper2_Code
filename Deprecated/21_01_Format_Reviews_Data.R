@@ -1,17 +1,17 @@
 # NOTES : Control the number of features on line 31-34.
 
 
-cat('* Begin Running file : ', '03_01_Format_Reviews_Data.R', " ...", '\n')
+cat('* Begin Running file : ', '21_01_Format_Reviews_Data.R', " ...", '\n')
 cat('* ------------------------------------------------------------', '\n')
 {
   cat('* R setup', '\n')
   cat('* -------', '\n')
   {
     rm(list = ls())
-    source(file = "00_00_Preamble.R")
+    source(file = "00_00_Preamble(current).R")
     # Packages needed in this program
     packages<-c("slam", "Matrix","ggplot2", "foreach", "doParallel", "tidyr", "dplyr", "data.table", "stringr", 
-                "gmm", "magrittr", "quanteda", "tidytext", "tm", "SnowballC", "devtools", "rlang")
+                "gmm", "magrittr", "quanteda", "tm", "SnowballC", "devtools", "rlang")
     # remove.packages(packages, lib = .libPaths())
     check.packages(packages)
     {
@@ -41,8 +41,8 @@ cat('* ------------------------------------------------------------', '\n')
     stopwords.list <- unlist(c(lapply(X = language.list, FUN = stopwords)), recursive = TRUE, use.names = TRUE)
   }
   
-  source(file = "11_01_Loading_Demand_Review_Data.R")
-  source(file = "12_01_Create_Sample.R")
+  source(file = "11_01_Loading_Demand_Review_Rental_Data(current).R")
+  source(file = "12_01_Create_Sample(current).R")
   
   cat('* Creating a bench mark panel sorted by property id and date ... ')
   {

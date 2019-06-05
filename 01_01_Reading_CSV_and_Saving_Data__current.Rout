@@ -1,0 +1,226 @@
+
+R version 3.5.2 (2018-12-20) -- "Eggshell Igloo"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> cat('Begin Running file : ', '01_01_Reading_CSV_and_Saving_Data.R', " ...", '\n')
+Begin Running file :  01_01_Reading_CSV_and_Saving_Data.R  ... 
+> cat('--------------------------------------------------------------------', '\n')
+-------------------------------------------------------------------- 
+> {
++   cat('R Setup', '\n')
++   cat('-------', '\n')
++   {
++     cat('Clearing up workspace ...', '\n')
++     rm(list = ls())
++     source(file = "00_00_Preamble__current.R")
++     
++     cat('Loading packages needed in this program ...', '\n')
++     packages<-c("tidyverse", "tidyr", "dplyr", "data.table", "parallel", "foreach")
++     # remove.packages(packages, lib = .libPaths())
++     # install.packages(packages, dependencies = TRUE)
++     check.packages(packages)
++     
++     {
++       cat('data.table options ...', '\n')
++       setDTthreads(threads = (detectCores() - 2 ))
++       cat('Data table threads set to ', getDTthreads(), '.', '\n')
++     }
++     
++     file.time <- Sys.time()
++     cat('R Setup', '\n')
++     cat('=======', '\n')
++   }
++   
++   cat('Reading Demand Data and saving as csv : ', '\n')
++   cat('----------------------------------------', '\n')
++   {
++     time <- Sys.time()
++     demand.data <- fread(file = paste(project.path, "Input/", "00_00_Demand_Regression_data.csv", sep = ""),
++                          sep = ',', 
++                          sep2 = '\t', 
++                          stringsAsFactors = FALSE)
++     demand.data <- demand.data %>% setDT()
++     saveRDS(demand.data, file = paste(project.path, "Output/TEMP/", "01_01_Demand_Regression_data.rds", sep = ""))
++     rm(demand.data)
++     gc()
++     cat('Time taken : ', '\n')
++     print(Sys.time() - time)
++     cat('Reading Demand Data and saving as csv : ', '\n')
++     cat('========================================', '\n')
++   }
++   
++   cat('Reading Reviews Data and saving as csv : ', '\n')
++   cat('----------------------------------------', '\n')
++   {
++     time <- Sys.time()
++     reviews.data.plain <- fread(file = paste(project.path, "Input/", "00_00_Reviews_data_plain.csv", sep = ""),
++                                 sep = ',', 
++                                 sep2 = '\t', 
++                                 stringsAsFactors = FALSE)
++     reviews.data.plain <- reviews.data.plain %>% setDT()
++     saveRDS(reviews.data.plain, file = paste(project.path, "Output/TEMP/", "01_01_Reviews_data_plain.rds", sep = ""))
++     rm(reviews.data.plain)
++     gc()
++     cat('Time taken : ', '\n')
++     print(Sys.time() - time)
++     cat('Reading Reviews Data and saving as csv : ', '\n')
++     cat('========================================', '\n')
++   }
++   
++   cat('Reading Rental Characteristics Data and saving as csv : ', '\n')
++   cat('----------------------------------------', '\n')
++   {
++     time <- Sys.time()
++     rental.data <- fread(file = paste(project.path, "Input/", "00_00_Rental_Characteristics_Add_Desc.csv", sep = ""),
++                         sep = ',', 
++                         sep2 = '\t', 
++                         stringsAsFactors = FALSE)
++     rental.data <- rental.data %>% setDT()
++     saveRDS(rental.data,  file = paste(project.path, "Output/TEMP/", "01_01_Rental_Characteristics_Add_Desc.rds", sep = ""))
++     rm(rental.data)
++     gc()
++     cat('Time taken : ', '\n')
++     print(Sys.time() - time)
++     cat('Reading Price Data and saving as csv : ', '\n')
++     cat('========================================', '\n')
++   }
++   
++   cat('Reading PID Data and saving as csv : ', '\n')
++   cat('----------------------------------------', '\n')
++   {
++     time <- Sys.time()
++     pid.data <- fread(file = paste(project.path, "Input/", "00_00_pid_key.csv", sep = ""),
++                         sep = ',', 
++                         sep2 = '\t', 
++                         stringsAsFactors = FALSE)
++     pid.data <- pid.data %>% setDT()
++     saveRDS(pid.data, file = paste(project.path, "Output/TEMP/", "01_01_pid_key.rds", sep = ""))
++     rm(pid.data)
++     gc()
++     cat('Time taken : ', '\n')
++     print(Sys.time() - time)
++     cat('Reading Price Data and saving as csv : ', '\n')
++     cat('========================================', '\n')
++   }
++   
++   cat('Reading Price Data and saving as csv : ', '\n')
++   cat('----------------------------------------', '\n')
++   {
++     time <- Sys.time()
++     price.data <- fread(file = paste(project.path, "Input/", "00_00_Price_Regression_data.csv", sep = ""),
++                         sep = ',', 
++                         sep2 = '\t', 
++                         stringsAsFactors = FALSE)
++     price.data <- price.data %>% setDT()
++     saveRDS(price.data, file = paste(project.path, "Output/TEMP/", "01_01_Price_Regression_data.rds", sep = ""))
++     rm(price.data)
++     gc()
++     cat('Time taken : ', '\n')
++     print(Sys.time() - time)
++     cat('Reading Price Data and saving as csv : ', '\n')
++     cat('========================================', '\n')
++   }
++   
++   cat('End Running file : ', '01_01_Reading_CSV_and_Saving_Data.R', " ...", '\n')
++   cat('Time taken : ', '\n')
++   print(Sys.time() - file.time)
++   cat('==================================================================', '\n')
++ }
+R Setup 
+------- 
+Clearing up workspace ... 
+* SET PROJECT PATH ...  
+[1] "R Project path set to:  Y:/agrajg/Research/Paper2/"
+* Create new folders if non-exist 
+Loading packages needed in this program ... 
+Loading required package: tidyverse
+-- Attaching packages --------------------------------------- tidyverse 1.2.1 --
+v ggplot2 3.1.0     v purrr   0.3.0
+v tibble  2.0.1     v dplyr   0.7.8
+v tidyr   0.8.2     v stringr 1.3.1
+v readr   1.3.1     v forcats 0.3.0
+-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()
+Loading required package: data.table
+
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+The following object is masked from 'package:purrr':
+
+    transpose
+
+Loading required package: parallel
+Loading required package: foreach
+
+Attaching package: 'foreach'
+
+The following objects are masked from 'package:purrr':
+
+    accumulate, when
+
+data.table options ... 
+Data table threads set to  34 . 
+R Setup 
+======= 
+Reading Demand Data and saving as csv :  
+---------------------------------------- 
+Time taken :  
+Time difference of 4.167348 mins
+Reading Demand Data and saving as csv :  
+======================================== 
+Reading Reviews Data and saving as csv :  
+---------------------------------------- 
+Time taken :  
+Time difference of 1.383469 mins
+Reading Reviews Data and saving as csv :  
+======================================== 
+Reading Rental Characteristics Data and saving as csv :  
+---------------------------------------- 
+Time taken :  
+Time difference of 23.35702 secs
+Reading Price Data and saving as csv :  
+======================================== 
+Reading PID Data and saving as csv :  
+---------------------------------------- 
+Time taken :  
+Time difference of 0.405313 secs
+Reading Price Data and saving as csv :  
+======================================== 
+Reading Price Data and saving as csv :  
+---------------------------------------- 
+Time taken :  
+Time difference of 26.13368 mins
+Reading Price Data and saving as csv :  
+======================================== 
+End Running file :  01_01_Reading_CSV_and_Saving_Data.R  ... 
+Time taken :  
+Time difference of 32.08179 mins
+================================================================== 
+Warning message:
+package 'ggplot2' was built under R version 3.5.3 
+> 
+> proc.time()
+   user  system elapsed 
+1275.98  119.04 1944.90 

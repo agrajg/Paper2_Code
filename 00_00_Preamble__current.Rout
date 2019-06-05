@@ -1,0 +1,93 @@
+
+R version 3.5.3 (2019-03-11) -- "Great Truth"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # Preamble for R.
+> # Setting project path
+> # input these correctly.
+> 
+> cat('* SET PROJECT PATH ... ', '\n')
+* SET PROJECT PATH ...  
+> project.path = gsub(x = getwd(), pattern = "Code", replacement = "")
+> print(paste("R Project path set to: ", project.path, sep = " "))
+[1] "R Project path set to:  Y:/agrajg/Research/Paper2/"
+> 
+> # cat('* SET LIBRARY PATH ... ', '\n')
+> # {
+> #   library.path  = c("C:/Users/agrajg/Documents/R/win-library/3.5")
+> #   cat('* Setting Library Path ... ')
+> #   .libPaths(new = library.path)
+> #   print(paste("R Library path set to: ", library.path, sep = " ")) 
+> # }
+> 
+> 
+> cat('* Create new folders if non-exist' , '\n')
+* Create new folders if non-exist 
+> {
++   if(!dir.exists(paste(project.path, "Output/", sep=""))){
++     dir.create(paste(project.path, "Output/", sep=""))
++   }
++   
++   if(!dir.exists(paste(project.path, "Output/TEMP/", sep=""))){
++     dir.create(paste(project.path, "Output/TEMP/", sep=""))
++   }
++   
++   if(!dir.exists(paste(project.path, "Output/Final/", sep=""))){
++     dir.create(paste(project.path, "Output/Final/", sep=""))
++   }
++   
++   if(!dir.exists(paste(project.path, "Output/TEMP/ForH2O_DML/", sep=""))){
++     dir.create(paste(project.path, "Output/TEMP/ForH2O_DML/", sep=""))
++   }
++   
++   if(!dir.exists(paste(project.path, "Output/TEMP/ForH2O_Rental_GLRM/", sep=""))){
++     dir.create(paste(project.path, "Output/TEMP/ForH2O_Rental_GLRM/", sep=""))
++   }
++   
++   if(!dir.exists(paste(project.path, "Output/TEMP/ForH2O_Reviews_GLRM/", sep=""))){
++     dir.create(paste(project.path, "Output/TEMP/ForH2O_Reviews_GLRM/", sep=""))
++   }
++ }
+> 
+> # {
+> #   cat('* Install Fresh H2O ... ')
+> #   if ("package:h2o" %in% search()) { detach("package:h2o", unload=TRUE) }
+> #   if ("h2o" %in% rownames(installed.packages())) { remove.packages("h2o") }
+> #   pkgs <- c("RCurl","jsonlite")
+> #   for (pkg in pkgs) {
+> #     if (! (pkg %in% rownames(installed.packages()))) { install.packages(pkg) }
+> #   }
+> #   rm(pkgs)
+> #   install.packages("h2o", type="source", repos=(c("http://h2o-release.s3.amazonaws.com/h2o/latest_stable_R")), dependencies = TRUE)
+> # }
+> 
+> 
+> # # Check package function 
+> # check.packages <- function(pkg){
+> #   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+> #   if (length(new.pkg)) 
+> #     install.packages(new.pkg, dependencies = TRUE, repos = "https://cran.cnr.berkeley.edu/")
+> #   sapply(pkg, require, character.only = TRUE)
+> # }
+> 
+> 
+> proc.time()
+   user  system elapsed 
+   0.20    0.06    1.06 

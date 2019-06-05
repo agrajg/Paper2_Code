@@ -1,0 +1,2128 @@
+
+R version 3.5.3 (2019-03-11) -- "Great Truth"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # NOTES : Control the number of features on line 31-34.
+> rm(list = ls())
+> source(file = "00_00_Preamble__current.R")
+* SET PROJECT PATH ...  
+[1] "R Project path set to:  Y:/agrajg/Research/Paper2/"
+* Create new folders if non-exist 
+> 
+> cat('# Begin Running file : ', '21_01_Format_Reviews_Data.R', " ...", '\n')
+# Begin Running file :  21_01_Format_Reviews_Data.R  ... 
+> cat('# ------------------------------------------------------------', '\n')
+# ------------------------------------------------------------ 
+> file.time <- Sys.time()
+> 
+> cat('# Packages needed in this program', '\n')
+# Packages needed in this program 
+> {
++   library(slam)
++   library(Matrix)
++   library(ggplot2)
++   library(foreach)
++   library(doParallel)
++   library(dplyr)
++   library(data.table)
++   library(stringr)
++   library(magrittr)
++   library(quanteda)
++   library(tm)
++   library(SnowballC)
++   library(devtools)
++   library(rlang)
++ }
+Loading required package: iterators
+Loading required package: parallel
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+The following object is masked from 'package:slam':
+
+    rollup
+
+Package version: 1.4.3
+Parallel computing: 2 of 72 threads used.
+See https://quanteda.io for tutorials and examples.
+
+Attaching package: 'quanteda'
+
+The following object is masked from 'package:utils':
+
+    View
+
+Loading required package: NLP
+
+Attaching package: 'NLP'
+
+The following object is masked from 'package:ggplot2':
+
+    annotate
+
+
+Attaching package: 'tm'
+
+The following objects are masked from 'package:quanteda':
+
+    as.DocumentTermMatrix, stopwords
+
+
+Attaching package: 'rlang'
+
+The following object is masked from 'package:magrittr':
+
+    set_names
+
+The following object is masked from 'package:data.table':
+
+    :=
+
+> 
+> cat('# data.table and quanteda options ...', '\n')
+# data.table and quanteda options ... 
+> {
++   setDTthreads(threads = detectCores() - 2)
++   cat('# Data table threads set to ', getDTthreads(), '.', '\n')
++   quanteda_options(threads = detectCores() - 2)
++   quanteda_options(language_stemmer = 'English')
++ 
++   cat('# Setting up stopwords list ... ', '\n')
++   language.list <- setdiff(getStemLanguages(),c("porter", "turkish"))
++   stopwords.list <- unlist(c(lapply(X = language.list, FUN = stopwords)), recursive = TRUE, use.names = TRUE)
++ }
+# Data table threads set to  2 . 
+# Setting up stopwords list ...  
+> 
+> # Inputs
+> min.doc.percent <- 0.01    # Percentage of documents the term should atleast exist.
+> 
+> {
++   cat('# FILE : 11_01_Loading_Demand_Review_Rental_Data__current.R ... ', '\n')
++   source(file = "11_01_Loading_Demand_Review_Rental_Data__current.R")
++   
++   cat('# FILE : 12_01_Create_Sample__current.R ... ', '\n')
++   source(file = "12_01_Create_Sample__current.R")
++   
++   if(length(list.files(path = paste(project.path, "Output/TEMP/ForH2O_DML/", sep = ""))) > 0){
++     cat('# Removing existing files in the ForH2O_DML folder', '\n')
++     file.remove(paste(project.path, 
++                       "Output/TEMP/ForH2O_DML/",
++                       list.files(path = paste(project.path, 
++                                               "Output/TEMP/ForH2O_DML/", 
++                                               sep = "")
++                                  ),
++                       sep = ""
++                       )
++                 )
++   }else{cat('# No files exist in ForH2O_DML folder', '\n')}
++   
++   cat('# FILE : 21_01_Configuring_review_text_data__current.R ... ', '\n')
++   source(file = "21_01_Configuring_review_text_data__current.R")
++ 
++   cat('# FILE : 21_01_Final_Demand_Data__current.R ... ', '\n')
++   source(file = "21_01_Final_Demand_Data__current.R")
++   
++   cat('# FILE : 21_01_Final_Rental_Characteristic_Data__current.R ... ', '\n')
++   source(file = "21_01_Final_Rental_Characteristic_Data__current.R")
++ }
+# FILE : 11_01_Loading_Demand_Review_Rental_Data__current.R ...  
+# Begin Running file :  11_01_Loading_Demand_Review_Data.R  ... 
+# ------------------------------------------------------------------- 
+# Loading and preparing the demand data 
+# ------------------------------------- 
+# Converting date into R date format ...  
+# Ordering by propertyid and date ...  
+# Structure of demand.data :  
+Classes 'data.table' and 'data.frame':	25154404 obs. of  50 variables:
+ $ propertyid           : int  105 105 105 105 105 105 105 105 105 105 ...
+ $ date                 : Date, format: "2014-09-01" "2014-09-02" ...
+ $ status               : chr  "A" "A" "A" "A" ...
+ $ price                : int  599 599 599 599 899 899 599 599 599 599 ...
+ $ lprice               : num  6.4 6.4 6.4 6.4 6.8 ...
+ $ price_per_person     : num  85.6 85.6 85.6 85.6 128.4 ...
+ $ lprice_per_person    : num  4.45 4.45 4.45 4.45 4.86 ...
+ $ ladj_price           : num  6.38 6.38 6.38 6.38 6.78 ...
+ $ adj_price_per_person : num  84.1 84.1 84.1 84.1 126.2 ...
+ $ ladj_price_per_person: num  4.43 4.43 4.43 4.43 4.84 ...
+ $ reservationid        : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ bookeddate           : chr  "" "" "" "" ...
+ $ hostid               : int  500 500 500 500 500 500 500 500 500 500 ...
+ $ listingtype          : chr  "Private room" "Private room" "Private room" "Private room" ...
+ $ createddate          : chr  "28jun2008" "28jun2008" "28jun2008" "28jun2008" ...
+ $ state                : chr  "New York" "New York" "New York" "New York" ...
+ $ neighborhood         : chr  "Midtown" "Midtown" "Midtown" "Midtown" ...
+ $ nbhd                 : chr  "Midtown" "Midtown" "Midtown" "Midtown" ...
+ $ nbhd_group           : int  5 5 5 5 5 5 5 5 5 5 ...
+ $ borough              : chr  "Manhattan" "Manhattan" "Manhattan" "Manhattan" ...
+ $ bedrooms             : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ bathrooms            : num  1 1 1 1 1 1 1 1 1 1 ...
+ $ maxguests            : int  7 7 7 7 7 7 7 7 7 7 ...
+ $ latitude             : num  40.8 40.8 40.8 40.8 40.8 ...
+ $ longitude            : num  -74 -74 -74 -74 -74 ...
+ $ demand               : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ capacity             : int  7 7 7 7 7 7 7 7 7 7 ...
+ $ qdemand              : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ demand_l1            : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ qdemand_l1           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ demand_l2            : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ qdemand_l2           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ demand_l3            : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ qdemand_l3           : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ adj_price            : num  589 589 589 589 883 ...
+ $ proddum              : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ p_age                : int  2256 2257 2258 2259 2260 2261 2262 2263 2264 2265 ...
+ $ h_age                : int  2256 2257 2258 2259 2260 2261 2262 2263 2264 2265 ...
+ $ p_dayshosting        : int  31 32 33 34 35 36 37 38 39 40 ...
+ $ h_dayshosting        : int  31 32 33 34 35 36 37 38 39 40 ...
+ $ p_daysbooked         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ h_daysbooked         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ guestdum             : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ p_guestcount         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ h_guestcount         : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ prod_week1           : int  7 7 7 7 7 7 7 7 7 7 ...
+ $ prod_week2           : int  14 14 14 14 14 14 14 14 14 14 ...
+ $ prod_week3           : int  21 21 21 21 21 21 21 21 21 21 ...
+ $ prod_week4           : int  28 28 28 28 28 28 28 28 28 28 ...
+ $ prod_week5           : int  31 32 33 34 35 35 35 35 35 35 ...
+ - attr(*, ".internal.selfref")=<externalptr> 
+NULL
+# Loading and preparing the demand data 
+# Time taken :  
+Time difference of 1.958926 mins
+# ===================================== 
+# Loading and preparing the text data 
+# ----------------------------------- 
+# Converting date into R date format ...  
+# Rename date as rev_date variable in reviews data ...  
+# Ordering by propertyid and rev_date ...  
+# structure of review.plain.data :  
+Classes 'data.table' and 'data.frame':	1191481 obs. of  6 variables:
+ $ propertyid   : int  105 105 105 105 105 105 105 105 105 105 ...
+ $ rev_date     : Date, format: "2008-10-06" "2009-09-13" ...
+ $ reviewer_id  : int  2720 35940 37110 43085 48012 53975 48501 35623 57879 56513 ...
+ $ id           : int  182 9999 12981 14377 16148 19534 20740 25656 28274 31452 ...
+ $ reviewer_name: chr  "Anne" "Kelly" "Michael" "Mark" ...
+ $ comments     : chr  "Lovely area, very close to times square and 5th avenue, really nice couple, lovely loft place....alastair has m"| __truncated__ "Our stay with Alastair and Iris far exceeded our expectations.  Their home was truly extended to us with the gr"| __truncated__ "Location is excellent, just to blocks from the heart of Manhattan.  Worth the price. During the walks to Times "| __truncated__ "What a great place to stay!  My wife and I went on our first trip to New York City and had a wonderful time.  A"| __truncated__ ...
+ - attr(*, ".internal.selfref")=<externalptr> 
+NULL
+# Loading and preparing the text data 
+# Time taken :  
+Time difference of 8.917844 secs
+# =================================== 
+# Loading and preparing the rental data 
+# ------------------------------------- 
+# Structure of rental.data :  
+Classes 'data.table' and 'data.frame':	108212 obs. of  62 variables:
+ $ propertyid                 : int  105 2515 2534 2539 2595 2684 3330 3647 3687 3831 ...
+ $ host_response_rate         : int  100 100 90 100 0 100 95 0 100 100 ...
+ $ host_acceptance_rate       : int  0 0 100 0 0 100 100 0 47 0 ...
+ $ security_deposit           : int  0 0 500 250 0 0 150 0 0 500 ...
+ $ cleaning_fee               : int  0 40 25 25 0 0 75 0 0 0 ...
+ $ guests_included            : int  2 2 2 1 0 2 2 0 1 1 ...
+ $ extra_people               : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ minimum_nights             : int  1 2 3 1 0 1 3 0 1 1 ...
+ $ maximum_nights             : int  730 29 30 730 0 730 730 0 30 730 ...
+ $ review_scores_rating       : int  96 92 60 100 0 100 95 0 92 90 ...
+ $ review_scores_accuracy     : int  9 9 6 10 0 10 10 0 9 9 ...
+ $ review_scores_cleanliness  : int  10 9 8 10 0 10 10 0 9 9 ...
+ $ review_scores_checkin      : int  10 9 4 10 0 10 9 0 10 9 ...
+ $ review_scores_communication: int  10 9 6 10 0 10 9 0 10 10 ...
+ $ review_scores_location     : int  10 9 8 10 0 10 9 0 8 9 ...
+ $ review_scores_value        : int  10 9 8 10 0 10 9 0 9 9 ...
+ $ host_listing_count         : int  2 4 1 1 5 3 1 1 2 1 ...
+ $ thumbnail_url_dum          : int  1 1 1 1 1 0 1 1 0 1 ...
+ $ medium_url_dum             : int  1 1 1 1 1 0 1 1 0 1 ...
+ $ picture_url_dum            : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ xl_picture_url_dum         : int  1 1 1 1 1 0 1 1 0 1 ...
+ $ host_url_dum               : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ host_thumbnail_url_dum     : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_picture_url_dum       : int  1 1 1 1 1 1 1 0 1 1 ...
+ $ host_verifications_email   : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_verifications_phone   : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_verifications_facebook: int  0 1 0 0 0 0 0 0 0 0 ...
+ $ host_verifications_linkedin: int  0 0 0 0 0 0 0 0 0 0 ...
+ $ host_verifications_reviews : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_verifications_gid     : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ host_verifications_others  : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_is_superhost_dum      : int  0 0 0 0 0 1 0 0 0 0 ...
+ $ host_has_profile_pic_dum   : int  1 1 1 1 0 0 1 0 0 1 ...
+ $ host_identity_verified_dum : int  0 1 1 1 0 0 1 0 0 1 ...
+ $ requires_license_dum       : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ rgpv_dum                   : int  1 0 0 0 0 0 0 0 0 0 ...
+ $ rgpp_dum                   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ bedrooms                   : int  1 1 1 1 0 1 1 1 0 1 ...
+ $ bathrooms                  : num  1 1 1 1 1 2 1 1 1 1 ...
+ $ maxguests                  : int  7 2 2 6 2 2 2 2 3 3 ...
+ $ securitydeposit            : int  0 0 500 250 350 100 150 200 0 500 ...
+ $ cleaningfee                : int  0 40 25 25 98 0 95 75 0 0 ...
+ $ extrapeoplefee             : int  150 40 0 25 0 0 50 20 39 0 ...
+ $ minimumstay                : int  1 2 3 1 1 1 5 3 1 1 ...
+ $ host_response_time         : chr  "within an hour" "within a few hours" "within a few hours" "within an hour" ...
+ $ propertytype               : chr  "Apartment" "Apartment" "Apartment" "Apartment" ...
+ $ listingtype                : chr  "Private room" "Private room" "Entire home/apt" "Private room" ...
+ $ cancellationpolicy         : chr  "Flexible" "strict" "Moderate" "moderate" ...
+ $ checkintime                : chr  "4:00PM" "NR" "NR" "8:00AM" ...
+ $ checkouttime               : chr  "11:00AM" "12:00PM" "NR" "12:00PM" ...
+ $ instantbookenabled         : chr  "No" "No" "No" "No" ...
+ $ nbhd                       : chr  "Midtown" "Central Harlem" "Upper East Side" "Kensington" ...
+ $ nbhd_group                 : int  5 11 8 12 5 7 1 11 NA 2 ...
+ $ borough                    : chr  "Manhattan" "Manhattan" "Manhattan" "Brooklyn" ...
+ $ latitude                   : num  40.8 40.8 40.8 40.6 40.8 ...
+ $ longitude                  : num  -74 -74 -74 -74 -74 ...
+ $ latitude_2                 : num  1662 1665 1662 1652 1661 ...
+ $ longitude_2                : num  5475 5469 5470 5472 5474 ...
+ $ latitude_longitude         : num  -3016 -3017 -3015 -3007 -3015 ...
+ $ latitude_2_longitude_2     : int  9097664 9103805 9089125 9040792 9090868 9104225 9060623 9105284 9047712 9054460 ...
+ $ bed_amenities              : chr  "Real Bed TV,-Cable TV-,Internet,-Wireless Internet-,-Air Conditioning-,Kitchen,-Pets Allowed-,Doorman,Breakfast"| __truncated__ "Real Bed -Cable TV-,Internet,-Wireless Internet-,-Air conditioning-,Kitchen,-Buzzer/wireless intercom-,Heating,"| __truncated__ "Real Bed TV,-Cable TV-,Internet,-Wireless Internet-,-Air Conditioning-,Kitchen,Heating,-Smoke Detector-,-Carbon"| __truncated__ "Real Bed TV,-Cable TV-,Internet,-Wireless Internet-,-Air conditioning-,-Wheelchair accessible-,Kitchen,-Free pa"| __truncated__ ...
+ $ desc                       : chr  "Trendy Times Square Loft  THIS IS A SHARE and you will be staying with my wife and I, unless other arrangements"| __truncated__ "Stay at Chez Chic budget room #1 Step into our artistic spacious apartment and enjoy your artistic Guest room w"| __truncated__ "The Nest: Cozy, Quiet, Clean, Sunny Cozy and Quiet: quietest apt on AirBnB, faces courtyard, sunny sky views  C"| __truncated__ "Clean & quiet apt home by the park Renovated apt home in elevator building. Spacious, renovated, and clean apt "| __truncated__ ...
+ - attr(*, ".internal.selfref")=<externalptr> 
+NULL
+# Loading and preparing the rental data 
+# Time taken :  
+Time difference of 4.218253 secs
+# ===================================== 
+# Loading and preparing the pid data 
+# ------------------------------------- 
+# Structure of pid.data :  
+Classes 'data.table' and 'data.frame':	108212 obs. of  2 variables:
+ $ propertyid: int  105 2515 2534 2539 2595 2684 3330 3647 3687 3831 ...
+ $ pid       : int  1 2 3 4 5 6 7 8 9 10 ...
+ - attr(*, ".internal.selfref")=<externalptr> 
+NULL
+# Loading and preparing the pid.data 
+# Time taken :  
+Time difference of 0.09507298 secs
+# ===================================== 
+# End Running file :  11_01_Loading_Demand_Review_Data.R  ... 
+# Time taken :  
+Time difference of 0.1070819 secs
+# =================================================================== 
+# FILE : 12_01_Create_Sample__current.R ...  
+# Begin Running file :  12_01_Create_Sample.R  ... 
+# ------------------------------------------------------ 
+# Taking a sample of rentals ...  
+# Number of rentals in sample =  200 
+# Creating a sample of 200 rentals. ... 
+# Begin Running file :  12_01_Create_Sample.R  ... 
+# Time taken :  
+Time difference of 0.685528 secs
+# ====================================================== 
+# No files exist in ForH2O_DML folder 
+# FILE : 21_01_Configuring_review_text_data__current.R ...  
+# Creating a bench mark panel sorted by property id and date ... # Setting up a check for consistancy. 
+# ----------------------------------- 
+# Randomly pick 5 observation numbers# Check consistancy of text.panel.DT.original ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Check consistancy of demand.data ...  
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Setting up a check for consistancy. 
+# =================================== 
+# Tokenizing and preprocessing 
+# ---------------------------- 
+# Creating tokens Unigram bigram and bigram with skip ... 
+# Tokenizing and preprocessing 
+# Time taken :  
+Time difference of 1.017798 secs
+# ============================ 
+# Converting to a document feature matrix 
+# --------------------------------------- 
+# Initial DFM :  
+Document-feature matrix of: 1,757 documents, 79,355 features (99.9% sparse).
+# Removing review.tokens ...  
+# Converting to a document feature matrix 
+# Time taken :  
+Time difference of 1.434103 secs
+# ======================================= 
+# Perform trimming. 
+# ----------------- 
+# DFM after trim (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 1,757 documents, 79,355 features (99.9% sparse).
+# Removing review.tokens.dfm ...  
+# Perform trimming. 
+# Time taken :  
+Time difference of 0.4173269 secs
+# ================= 
+# Compute TF-IDF matrix. 
+# ---------------------- 
+# DFM after TF_IDF conversion (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 1,757 documents, 79,355 features (99.9% sparse).
+# **# NOTE *** 
+# This TF-IDF Matrix is still too large to convert to a matrix/data frame. 
+# So I break them in small objects with 200 features. 
+# ************ 
+# Removing review.tokens.dfm_trim ...  
+# Compute TF-IDF matrix. 
+# Time taken :  
+Time difference of 0.4943819 secs
+# ====================== 
+# Converting small matrix into rental time panel 
+# -------------------------------------------------- 
+# Trim again (200 features) after TF-IDF to make convertible matrix 
+# Begin for loop. 
+# --------------- 
+# For loop begins ...  
+# Features from  1  to  200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 201 features (91.9% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2391891 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.08007097 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+70 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.5584471 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+70 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.1541178 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03100991 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+69.8 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.44332 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+68.6 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.08005118 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 2.280769 secs
+# =============================== 
+# For loop begins ...  
+# Features from  201  to  400  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 200 features (97.7% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2431819 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.07105613 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+69.7 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.683527 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+69.7 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.1541221 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03202415 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+69.5 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.420316 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+68.2 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.07804894 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.704317 secs
+# =============================== 
+# For loop begins ...  
+# Features from  401  to  600  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 219 features (98.6% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2462039 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.07805896 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+76.2 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.548403 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+76.2 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.167141 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03502798 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+76 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.455339 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+74.7 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.07005405 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.578214 secs
+# =============================== 
+# For loop begins ...  
+# Features from  601  to  800  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 236 features (99.0% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.22017 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.0540421 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+82 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.4953809 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+82 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.3522711 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.02602005 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+81.9 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.4793689 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+80.4 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.264204 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.561202 secs
+# =============================== 
+# For loop begins ...  
+# Features from  801  to  1000  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 220 features (99.2% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2101619 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.04903793 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+76.5 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.478368 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+76.5 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.1881442 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.227175 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+76.4 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.842648 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+75 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.05304098 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.529182 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1001  to  1200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 212 features (99.3% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2101619 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.04803681 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+73.8 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.681525 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+73.8 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.1791379 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2171669 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+73.6 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.827637 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+72.3 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.05304003 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.408084 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1201  to  1400  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 174 features (99.4% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.20716 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.042032 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+60.7 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.459353 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+60.7 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.3362589 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2131639 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+60.6 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.5634339 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+59.4 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2571979 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.235957 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1401  to  1600  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 187 features (99.5% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2091608 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.04303408 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+65.2 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.4663591 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+65.2 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.3542731 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2291758 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+65 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.3562739 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+63.8 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.08106208 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.242957 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1601  to  1800  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 261 features (99.5% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.2131629 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.05804491 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+90.6 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.7025402 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+90.6 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.4073131 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2391841 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+90.5 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.7185528 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+88.9 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2501919 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.393075 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1801  to  2000  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 327 features (99.6% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.215168 secs
+# ======================== 
+# Combine with original to keep the rental and date information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original review data table ...  
+# Remove columns : reviewer_id , id , reviewer_name , comments , document ...  
+# Collect reviews that are posted on same day ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.07005501 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Creating text panel with variable rev_date to merge on (can be changed based on booking date) ... # Size of the panel :  
+848.2 kB
+# Secluding those that will not merge ...  
+# Merging rental panel with text data to create text panel ...  
+# Rbind additional rows that were not merged ...  
+# Size of the panel + merged text data:  
+113.3 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.9097002 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+113.3 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.4533501 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2461901 secs
+# ========================================== 
+# Calculating the cumulative sum. 
+# ------------------------------- 
+# No need of rev_date anymore ...  
+# Size of the panel + merged text data + zeros + cumulation  
+113.2 MB
+# Subset by dates ...  
+# Calculating the cumulative sum. 
+# Time taken :  
+Time difference of 0.8306398 secs
+# =============================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with reviews :  
+111.3 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.262202 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.589223 secs
+# =============================== 
+# For loop begins ...  
+# Features from  2001  to  2200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 1,757 documents, 0 features.
+# Breaking the loop at i =  2001 
+# End for loop. 
+# ============= 
+# FILE : 21_01_Final_Demand_Data__current.R ...  
+# Final demand panel prep and save. 
+# --------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Writing the csv ...  
+# Final demand panel prep and save. 
+# Time taken :  
+Time difference of 0.4703622 secs
+# ================================= 
+# FILE : 21_01_Final_Rental_Characteristic_Data__current.R ...  
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+13.1 MB
+# Removing text.DT ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.2021549 secs
+# ============================= 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.01100802 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with bed_amenitiess :  
+13.1 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.03202391 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 0.573441 secs
+# =============================== 
+# Setting up a check for consistancy. 
+# ----------------------------------- 
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Check consistancy of demand.data ...  
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Setting up a check for consistancy. 
+# =================================== 
+# Tokenizing and preprocessing 
+# ---------------------------- 
+# Creating tokens Unigram bigram and bigram with skip ... 
+# Tokenizing and preprocessing 
+# Time taken :  
+Time difference of 0.08506608 secs
+# ============================ 
+# Converting to a document feature matrix 
+# --------------------------------------- 
+# Initial DFM :  
+Document-feature matrix of: 200 documents, 555 features (92.4% sparse).
+# Removing bed_amenities.tokens ...  
+# Converting to a document feature matrix 
+# Time taken :  
+Time difference of 0.198153 secs
+# ======================================= 
+# Perform trimming. 
+# ----------------- 
+# DFM after trim (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 200 documents, 555 features (92.4% sparse).
+# Removing bed_amenities.tokens.dfm ...  
+# Perform trimming. 
+# Time taken :  
+Time difference of 0.1951501 secs
+# ================= 
+# Compute TF-IDF matrix. 
+# ---------------------- 
+# DFM after TF_IDF conversion (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 200 documents, 555 features (92.4% sparse).
+# **# NOTE *** 
+# This TF-IDF Matrix is still too large to convert to a matrix/data frame. 
+# So I break them in small objects with 200 features. 
+# ************ 
+# Removing bed_amenities.tokens.dfm_trim ...  
+# Compute TF-IDF matrix. 
+# Time taken :  
+Time difference of 0.205157 secs
+# ====================== 
+# Converting small matrix into rental time panel 
+# -------------------------------------------------- 
+# Trim again (200 features) after TF-IDF to make convertible matrix 
+# Begin for loop. 
+# --------------- 
+# For loop begins ...  
+# Features from  1  to  200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 206 features (81.8% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1971531 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original bed_amenities data table ...  
+# Remove columns : bed_amenitieser_id , id , bed_amenitieser_name , bed_amenities , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01200891 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+70.3 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.3933048 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+70.3 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.04103208 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03102398 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with bed_amenitiess :  
+70.3 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2381849 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.868438 secs
+# =============================== 
+# For loop begins ...  
+# Features from  201  to  400  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 209 features (98.1% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1861432 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original bed_amenities data table ...  
+# Remove columns : bed_amenitieser_id , id , bed_amenitieser_name , bed_amenities , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.0120101 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+71.3 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.3872981 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+71.3 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.044034 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03202391 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with bed_amenitiess :  
+71.3 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.238183 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.173904 secs
+# =============================== 
+# For loop begins ...  
+# Features from  401  to  600  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 140 features (99.5% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.194149 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original bed_amenities data table ...  
+# Remove columns : bed_amenitieser_id , id , bed_amenitieser_name , bed_amenities , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01100802 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+47.9 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.379292 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+47.9 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.03102398 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.02602005 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with bed_amenitiess :  
+47.9 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2261751 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 0.9297149 secs
+# =============================== 
+# End for loop. 
+# ============= 
+# Setting up a check for consistancy. 
+# ----------------------------------- 
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Check consistancy of demand.data ...  
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Setting up a check for consistancy. 
+# =================================== 
+# Tokenizing and preprocessing 
+# ---------------------------- 
+# Creating tokens Unigram bigram and bigram with skip ... 
+# Tokenizing and preprocessing 
+# Time taken :  
+Time difference of 0.225174 secs
+# ============================ 
+# Converting to a document feature matrix 
+# --------------------------------------- 
+# Initial DFM :  
+Document-feature matrix of: 200 documents, 45,499 features (99.2% sparse).
+# Removing desc.tokens ...  
+# Converting to a document feature matrix 
+# Time taken :  
+Time difference of 0.2591989 secs
+# ======================================= 
+# Perform trimming. 
+# ----------------- 
+# DFM after trim (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 200 documents, 45,499 features (99.2% sparse).
+# Removing desc.tokens.dfm ...  
+# Perform trimming. 
+# Time taken :  
+Time difference of 0.282217 secs
+# ================= 
+# Compute TF-IDF matrix. 
+# ---------------------- 
+# DFM after TF_IDF conversion (min_docfreq  = 1e-04 ) :  
+Document-feature matrix of: 200 documents, 45,499 features (99.2% sparse).
+# **# NOTE *** 
+# This TF-IDF Matrix is still too large to convert to a matrix/data frame. 
+# So I break them in small objects with 200 features. 
+# ************ 
+# Removing desc.tokens.dfm_trim ...  
+# Compute TF-IDF matrix. 
+# Time taken :  
+Time difference of 0.3362601 secs
+# ====================== 
+# Converting small matrix into rental time panel 
+# -------------------------------------------------- 
+# Trim again (200 features) after TF-IDF to make convertible matrix 
+# Begin for loop. 
+# --------------- 
+# For loop begins ...  
+# Features from  1  to  200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 210 features (77.2% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.200155 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01200986 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+71.6 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.4013119 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+71.6 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.04303384 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03402615 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+71.6 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.251193 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 2.085605 secs
+# =============================== 
+# For loop begins ...  
+# Features from  201  to  400  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 196 features (91.3% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1971519 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01100898 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+66.9 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.3973062 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+66.9 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.04003 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03402686 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+66.9 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.249192 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.395074 secs
+# =============================== 
+# For loop begins ...  
+# Features from  401  to  600  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 219 features (94.4% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1971521 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01200914 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+74.7 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.40431 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+74.7 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.044034 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03502607 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+74.7 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2521951 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.416093 secs
+# =============================== 
+# For loop begins ...  
+# Features from  601  to  800  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 202 features (95.8% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1971529 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01200986 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+68.9 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.398309 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+68.9 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.04203296 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.03302598 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+68.9 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.249191 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.281987 secs
+# =============================== 
+# For loop begins ...  
+# Features from  801  to  1000  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 366 features (96.8% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1981518 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01401091 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+124.5 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.4263291 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+124.5 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.278214 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.2642028 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+124.5 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.07505703 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 1.825405 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1001  to  1200  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 345 features (97.5% sparse).
+# Convert to a data table. 
+# ------------------------ 
+# Converting to df ...  
+# Renaming all text variables to end with _text ...  
+# Removing tfidf_trim200 ...  
+# Convert to a data table. 
+# Time taken :  
+Time difference of 0.1991539 secs
+# ======================== 
+# Combine with original to keep the rental information. 
+# -------------------------------------------------------------- 
+# Combining text data table to original desc data table ...  
+# Remove columns : descer_id , id , descer_name , desc , document ...  
+# Combine with original to keep the rental and date information. 
+# Time taken :  
+Time difference of 0.01300907 secs
+# ============================================================== 
+# Merging with the rental date panel. 
+# ----------------------------------- 
+# Merging rental panel with text data to create text panel ...  
+# Size of the panel + merged text data:  
+117.4 MB
+# Removing text.DT ...  
+# Removing text.panel.DT.not_merge ...  
+# Merging with the rental date panel. 
+# Time taken :  
+Time difference of 0.423326 secs
+# ============================= 
+# Replacing missing with 0 
+# ------------------------ 
+# Size of the panel + merged text data + zeros:  
+117.4 MB
+# Replacing missing with 0 
+# Time taken :  
+Time difference of 0.07205486 secs
+# ======================== 
+# Sorting by propertyid and date for cumsum. 
+# ------------------------------------------ 
+# Sorting by propertyid and date for cumsum. 
+# Time taken :  
+Time difference of 0.06104994 secs
+# ========================================== 
+# Merge with Original Text panel. 
+# ------------------------------- 
+# Left merge with original panel ...  
+# Size of the final panel data with descs :  
+117.4 MB
+# Merge with Original Text panel. 
+# Time taken :  
+Time difference of 0.2742109 secs
+# =============================== 
+# Final text panel prep and save. 
+# ------------------------------- 
+# Ordering ...  
+# Check consistancy ...  
+# Checking rows ...  
+[1]  1066  9720 28781 25048 12943
+# Check propertyid ...  
+[1]   43711 1884398 8971606 7317624 3272161
+# Check date ...  
+[1] "2017-02-26" "2016-10-06" "2016-08-24" "2016-04-27" "2016-09-28"
+# Removing propertyid and date ...  
+# Writing the csv ...  
+# Final text panel prep and save. 
+# Time taken :  
+Time difference of 2.573987 secs
+# =============================== 
+# For loop begins ...  
+# Features from  1201  to  1400  ...  
+# Trimming ...  
+# DFM TF IDF object after trim :  
+Document-feature matrix of: 200 documents, 0 features.
+# Breaking the loop at i =  1201 
+# End for loop. 
+# ============= 
+There were 30 warnings (use warnings() to see them)
+> 
+> cat('# End Running file : ', '03_01_Format_Reviews_Data.R', " ...", '\n')
+# End Running file :  03_01_Format_Reviews_Data.R  ... 
+> cat('# Time taken : ', '\n')
+# Time taken :  
+> print(Sys.time() - file.time)
+Time difference of 3.538193 mins
+> cat('# =========================XXXXXXXX=========================', '\n')
+# =========================XXXXXXXX========================= 
+> 
+> 
+> proc.time()
+   user  system elapsed 
+ 177.96    7.93  212.61 

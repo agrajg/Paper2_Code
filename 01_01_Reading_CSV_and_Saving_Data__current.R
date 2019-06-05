@@ -1,33 +1,21 @@
 cat('Begin Running file : ', '01_01_Reading_CSV_and_Saving_Data.R', " ...", '\n')
 cat('--------------------------------------------------------------------', '\n')
+rm(list = ls())
+source(file = "00_00_Preamble__current.R")
+
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(parallel)
+library(foreach)
+
+cat('data.table options ...', '\n')
+setDTthreads(threads = (detectCores() - 2 ))
+cat('Data table threads set to ', getDTthreads(), '.', '\n')
+
+
 {
-  cat('R Setup', '\n')
-  cat('-------', '\n')
-  {
-    cat('Clearing up workspace ...', '\n')
-    rm(list = ls())
-    source(file = "00_00_Preamble.R")
-    
-    cat('Loading packages needed in this program ...', '\n')
-    packages<-c("tidyverse", "tidyr", "dplyr", "data.table", "parallel", "foreach")
-    # remove.packages(packages, lib = .libPaths())
-    # install.packages(packages, dependencies = TRUE)
-    check.packages(packages)
-    
-    {
-      cat('data.table options ...', '\n')
-      setDTthreads(threads = (detectCores() - 2 ))
-      cat('Data table threads set to ', getDTthreads(), '.', '\n')
-    }
-    
-    file.time <- Sys.time()
-    cat('R Setup', '\n')
-    cat('=======', '\n')
-  }
-  
-  
-  
-  
   cat('Reading Demand Data and saving as csv : ', '\n')
   cat('----------------------------------------', '\n')
   {
@@ -64,6 +52,42 @@ cat('--------------------------------------------------------------------', '\n'
     cat('========================================', '\n')
   }
   
+  cat('Reading Rental Characteristics Data and saving as csv : ', '\n')
+  cat('----------------------------------------', '\n')
+  {
+    time <- Sys.time()
+    rental.data <- fread(file = paste(project.path, "Input/", "00_00_Rental_Characteristics_Add_Desc.csv", sep = ""),
+                        sep = ',', 
+                        sep2 = '\t', 
+                        stringsAsFactors = FALSE)
+    rental.data <- rental.data %>% setDT()
+    saveRDS(rental.data,  file = paste(project.path, "Output/TEMP/", "01_01_Rental_Characteristics_Add_Desc.rds", sep = ""))
+    rm(rental.data)
+    gc()
+    cat('Time taken : ', '\n')
+    print(Sys.time() - time)
+    cat('Reading Price Data and saving as csv : ', '\n')
+    cat('========================================', '\n')
+  }
+  
+  cat('Reading PID Data and saving as csv : ', '\n')
+  cat('----------------------------------------', '\n')
+  {
+    time <- Sys.time()
+    pid.data <- fread(file = paste(project.path, "Input/", "00_00_pid_key.csv", sep = ""),
+                        sep = ',', 
+                        sep2 = '\t', 
+                        stringsAsFactors = FALSE)
+    pid.data <- pid.data %>% setDT()
+    saveRDS(pid.data, file = paste(project.path, "Output/TEMP/", "01_01_pid_key.rds", sep = ""))
+    rm(pid.data)
+    gc()
+    cat('Time taken : ', '\n')
+    print(Sys.time() - time)
+    cat('Reading Price Data and saving as csv : ', '\n')
+    cat('========================================', '\n')
+  }
+  
   cat('Reading Price Data and saving as csv : ', '\n')
   cat('----------------------------------------', '\n')
   {
@@ -86,5 +110,4 @@ cat('--------------------------------------------------------------------', '\n'
   cat('Time taken : ', '\n')
   print(Sys.time() - file.time)
   cat('==================================================================', '\n')
-  
 }

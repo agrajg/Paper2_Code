@@ -4,19 +4,19 @@ rm(list = ls())
 cat('* Specify and begin h2o on stand alone machine ... ', '\n')
 {  
   n.threads = -1
-  port.num = 11111
+  port.num = 11114
   max.mem = '550G'
   force.DL = FALSE
   library(h2o)
   h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem, forceDL = force.DL)
   cat('* clean H2O slate - just in case the cluster was already running', '\n')
   h2o.removeAll() 
-  print(h2o.ls())
+  h2o.ls()
 }
 
 cat('* Call the DML main program ... ', '\n')
 {
-  source(file = '50_00_DML_Main.R')
+  source(file = '63_00_DML_Main.R')
 }
 
 cat('* H2O shutdown ... ','\n')

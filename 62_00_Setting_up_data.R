@@ -162,7 +162,7 @@
       cat('# Creating variable : ',paste(pvar, "contcap", sep = "_") ,'\n')
       final_df_h2o[, paste(pvar, "contcap", sep = "_")] = final_df_h2o[, pvar]*final_df_h2o[, "capacity"]
     }
-
+    
     cat('# X ...', '\n')
     
     cat('# Numeric covariates', '\n')

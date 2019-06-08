@@ -19,64 +19,22 @@ cat('* Load_Libraries ...', '\n')
 
 cat('* Take all inputs ...', '\n')
 {
-  filename.begin = "50_00"                                                              # For I/O Setup
-  max_text_features = 15000                                                             # For 50_00_Setting_up_data.R
+  filename.begin = "62_00"                                                              # For I/O Setup
+  max_text_features = 10000                                                             # For 50_00_Setting_up_data.R
   Seed_R = 9238928                                                                      # Seed for DML Folds
   times.split.dml = 1                                                                   # Number of times to perform DML 
   K.folds = 2                                                                           # Number of folds for CV and crossfitting
-  hparams_GLM = list(alpha = c(0.01, 0.1, 0.5, 0.9, 1), 
-                     lambda = c(0.0001, 0.001, 0.01, 0.1, 1, 10))                       # *** Change this in the final program
+  # GLM Parameters
+  hparams_GLM = list(alpha = c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99, 1))                       # *** Change this in the final program
   standardize_param_GLM = TRUE
-  lambda_search_param_GLM = FALSE
+  lambda_search_param_GLM = TRUE
   interaction_pairs_param_GLM = list(c("dayOfWeek", "nbhd"), c("latitude", "latitude"), c("longitude", "longitude"), c("latitude", "longitude"))
   interactions_param_GLM = c("year", "week", "nbhd")
   
-  # DRF Parameters
-  hparams_DRF = list(ntrees = c(50, 100, 500), 
-                     max_depth = c(20, 40 , 80), 
-                     min_rows = c(100, 1000, 2000),
-                     nbins = c(20, 40, 80))                                                   # *** Change this in the final program
-  stopping_rounds_param_DRF = 5
-  stopping_metric_param_DRF = "AUTO"
-  stopping_tolerance_param_DRF = 0.001
-  min_split_improvement_param_DRF = 1e-05
-  
-  # GBM Parameters
-  hparams_GBM = list(learn_rate = c(0.1, 0.3, 0.7),
-                     ntrees = c(50, 100, 500), 
-                     max_depth = c(20, 40 , 80), 
-                     min_rows = c(100, 1000, 2000),
-                     nbins = c(20, 40, 80))                                                   # *** Change this in the final program
-  learn_rate_annealing_param_GBM = 1
-  stopping_rounds_param_GBM = 5
-  stopping_metric_param_GBM = "AUTO"
-  stopping_tolerance_param_GBM = 0.001
-  min_split_improvement_param_GBM = 1e-05
-  
-  # Deep learning parameters
-  # https://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html
-  hparams_DL = list(hidden = list(c(10,20,10), c(10, 20, 10), c(50,20)), 
-                    activation = c("Rectifier", "Maxout", "Tanh"), 
-                    l1 = c(0, 0.00001, 0.0001, 0.001, 0.01), 
-                    l2 = c(0, 0.00001, 0.0001, 0.001, 0.01))                                  # *** Change this in the final program  
-  epochs_param_DL = 10
-  distribution_param_DL = c("AUTO")
-  score_interval_param_DL = 5
-  score_training_samples_param_DL = 10000
-  score_validation_samples_param_DL = 0
-  score_duty_cycle_param_DL = 0.1
-  classification_stop_param_DL = 0 
-  regression_stop_param_DL = 1e-06
-  stopping_rounds_param_DL = 5
-  stopping_metric_param_DL = c("AUTO")
-  stopping_tolerance_param_DL = 0.001
-  max_runtime_secs_param_DL = 0
-  sparse_param_DL = FALSE
-  
   # Other ML inputs
-  method_list = c("GLM", "DRF", "GBM", "DL")
-  search_criteria <- list(strategy = "RandomDiscrete", max_models = 2, stopping_tolerance = 0.0001)
-  # search_criteria <- list(strategy = "Cartesian")
+  method_list = c("GLM")
+  # search_criteria <- list(strategy = "RandomDiscrete", max_models = 2, stopping_tolerance = 0.0001)
+  search_criteria <- list(strategy = "Cartesian")
 }
 
 cat('* I/O Setup ...', '\n')
@@ -84,22 +42,22 @@ cat('* I/O Setup ...', '\n')
   filename.end = gsub(x = format(Sys.time(), "%Y %m %d %H %M %S"), pattern = " ", replacement = "_")
   cat('* Output files begin with : ', filename.begin, '\n')
   cat('* Output files end with : ', filename.end, '\n')
-  cat('* FILE : 50_00_Set_project_paths_and_create_folders.R', '\n')
-  source(file = '50_00_Set_project_paths_and_create_folders.R')
+  cat('* FILE : 62_00_Set_project_paths_and_create_folders.R', '\n')
+  source(file = '62_00_Set_project_paths_and_create_folders.R')
 }
 
 cat('* Importing and preparing the data for DML.', '\n')
 {
   cat('- Maximum text features to use = ', max_text_features, '\n')
-  cat('* FILE : 50_00_Setting_up_data.R', '\n')
-  source(file = "50_00_Setting_up_data.R")
+  cat('* FILE : 62_00_Setting_up_data.R', '\n')
+  source(file = "62_00_Setting_up_data.R")
   
-  cat('* FILE : 50_00_Defining_variables.R', '\n')
-  source(file = '50_00_Defining_variables.R')                                             # Change this program in the final program
+  cat('* FILE : 62_00_Defining_variables.R', '\n')
+  source(file = '62_00_Defining_variables.R')                                             # Change this program in the final program
 }
 
-cat('* FILE : 50_00_DML_Print_All_ML_Parameters.R', '\n')
-source(file = '50_00_DML_Print_All_ML_Parameters.R')
+cat('* FILE : 62_00_DML_Print_All_ML_Parameters.R', '\n')
+source(file = '62_00_DML_Print_All_ML_Parameters.R')
 
 cat('* MAIN PROGRAM : Model Selection and DML procedure ... ', '\n')
 {
@@ -112,7 +70,7 @@ cat('* MAIN PROGRAM : Model Selection and DML procedure ... ', '\n')
   
   cat('* Model Selection Proocess and DML ... ', '\n')
   for(i in 1:times.split.dml){
-    # i=1
+    # i = 1
     cat('* Running Grid search and DML process - ', i , ' - time ... ','\n')
     cat('* Creating a split for this DML process, Iteration = ', i , '\n')
     {
@@ -132,15 +90,12 @@ cat('* MAIN PROGRAM : Model Selection and DML procedure ... ', '\n')
                           method_name = c(), 
                           train_MSE = c(), 
                           xval_MSE = c(),
-                          GLM_alpha = c(), GLM_lambda = c(), 
-                          DRF_ntrees = c(), DRF_max_depth  = c(), DRF_min_rows  = c(), DRF_nbins = c(),
-                          GBM_learn_rate = c(), GBM_ntrees = c(), GBM_max_depth = c(), GBM_min_rows = c(), GBM_nbins = c(), 
-                          DL_hidden = c(), DL_activation = c(), DL_l1 = c(), DL_l2 = c(), grid_seed = c()
+                          GLM_alpha = c()
                           )  
     }
     
-    cat('* FILE : 50_00_Model_Selection.R, Iteration = ', i , '\n')
-    source(file = '50_00_Model_Selection.R')
+    cat('* FILE : 62_00_Model_Selection.R, Iteration = ', i , '\n')
+    source(file = '62_00_Model_Selection.R')
     
     cat('* Output Grid search results to CSV, Iteration = ', i , '\n')
     {
@@ -183,20 +138,8 @@ cat('* MAIN PROGRAM : Model Selection and DML procedure ... ', '\n')
                                 seed = c())  
       }
       
-      cat('* FILE : 50_00_DML_Procedure_for_GLM.R, Iteration = ', i , '\n')
-      source(file = '50_00_DML_Procedure_for_GLM.R')
-      
-      cat('* FILE : 50_00_DML_Procedure_for_DRF.R, Iteration = ', i , '\n')
-      source(file = '50_00_DML_Procedure_for_DRF.R')
-      
-      cat('* FILE : 50_00_DML_Procedure_for_GBM.R, Iteration = ', i , '\n')
-      source(file = '50_00_DML_Procedure_for_GBM.R')
-      
-      cat('* FILE : 50_00_DML_Procedure_for_DL.R, Iteration = ', i , '\n')
-      source(file = '50_00_DML_Procedure_for_DL.R')
-      
-      cat('* FILE : 50_00_DML_Procedure_for_Ensemble_Best.R, Iteration = ', i , '\n')
-      source(file = '50_00_DML_Procedure_for_Ensemble_Best.R')
+      cat('* FILE : 62_00_DML_Procedure_for_GLM.R, Iteration = ', i , '\n')
+      source(file = '62_00_DML_Procedure_for_GLM.R')
       
       cat('* Output ML performance and DML results, Iteration = ', i , '\n')
       {

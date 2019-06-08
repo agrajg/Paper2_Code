@@ -11,12 +11,12 @@ cat('* Specify and begin h2o on stand alone machine ... ', '\n')
   h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem, forceDL = force.DL)
   cat('* clean H2O slate - just in case the cluster was already running', '\n')
   h2o.removeAll() 
-  print(h2o.ls())
+  h2o.ls()
 }
 
 cat('* Call the DML main program ... ', '\n')
 {
-  source(file = '50_00_DML_Main.R')
+  source(file = '60_00_DML_Main.R')
 }
 
 cat('* H2O shutdown ... ','\n')

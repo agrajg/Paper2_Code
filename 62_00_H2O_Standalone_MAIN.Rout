@@ -1,0 +1,134 @@
+
+R version 3.5.3 (2019-03-11) -- "Great Truth"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> cat('* Clear all work space ... ', '\n')
+* Clear all work space ...  
+> rm(list = ls())
+> 
+> cat('* Specify and begin h2o on stand alone machine ... ', '\n')
+* Specify and begin h2o on stand alone machine ...  
+> {  
++   n.threads = -1
++   port.num = 11113
++   max.mem = '550G'
++   force.DL = FALSE
++   library(h2o)
++   h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem, forceDL = force.DL)
++   cat('* clean H2O slate - just in case the cluster was already running', '\n')
++   h2o.removeAll() 
++   h2o.ls()
++ }
+
+----------------------------------------------------------------------
+
+Your next step is to start H2O:
+    > h2o.init()
+
+For H2O package documentation, ask for help:
+    > ??h2o
+
+After starting H2O, you can use the Web UI at http://localhost:54321
+For more information visit http://docs.h2o.ai
+
+----------------------------------------------------------------------
+
+
+Attaching package: 'h2o'
+
+The following objects are masked from 'package:stats':
+
+    cor, sd, var
+
+The following objects are masked from 'package:base':
+
+    %*%, %in%, &&, ||, apply, as.factor, as.numeric, colnames,
+    colnames<-, ifelse, is.character, is.factor, is.numeric, log,
+    log10, log1p, log2, round, signif, trunc
+
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\TEMP\35\RtmpUpmBS4/h2o_agrajg_started_from_r.out
+    C:\TEMP\35\RtmpUpmBS4/h2o_agrajg_started_from_r.err
+
+java version "1.8.0_211"
+Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
+
+Starting H2O JVM and connecting: ............................................................Cannot load library from path lib/windows_64/xgboost4j_gpu.dll
+Cannot load library from path lib/xgboost4j_gpu.dll
+Failed to load library from both native path and jar!
+Cannot load library from path lib/windows_64/xgboost4j_omp.dll
+Cannot load library from path lib/xgboost4j_omp.dll
+Failed to load library from both native path and jar!
+Cannot load library from path lib/windows_64/xgboost4j_minimal.dll
+Cannot load library from path lib/xgboost4j_minimal.dll
+Failed to load library from both native path and jar!
+Cannot initialize XGBoost backend! Xgboost (enabled GPUs) needs: 
+  - CUDA 8.0
+XGboost (minimal version) needs: 
+  - GCC 4.7+
+For more details, run in debug mode: `java -Dlog4j.configuration=file:///tmp/log4j.properties -jar h2o.jar`
+
+----- H2O started  -----
+Build git branch: rel-yates
+Build git hash: 831838608b642e514650deebc5621b94efdcde74
+Build git describe: jenkins-3.24.0.2-53-g8318386
+Build project version: 3.24.0.3
+Build age: 1 month and 1 day
+Built by: 'jenkins'
+Built on: '2019-05-07 03:22:49'
+Found H2O Core extensions: [Watchdog, KrbStandalone]
+Processed H2O arguments: [-name, H2O_started_from_R_agrajg_hty934, -ip, localhost, -web_ip, localhost, -port, 11113, -ice_root, C:/TEMP/35/RtmpUpmBS4]
+Java availableProcessors: 36
+Java heap totalMemory: 1.92 GB
+Java heap maxMemory: 488.89 GB
+Java version: Java 1.8.0_211 (from Oracle Corporation)
+JVM launch parameters: [-Xmx550G, -ea]
+OS version: Windows Server 2016 10.0 (amd64)
+Machine physical memory: 1022.63 GB
+Machine locale: en_US
+X-h2o-cluster-id: 1560025803694
+User name: 'agrajg'
+IPv6 stack selected: false
+Possible IP Address: lo (Software Loopback Interface 1), 127.0.0.1
+Possible IP Address: lo (Software Loopback Interface 1), 0:0:0:0:0:0:0:1
+Network interface is down: name:net0 (Microsoft ISATAP Adapter #3)
+Network interface is down: name:net1 (Teredo Tunneling Pseudo-Interface)
+Network interface is down: name:eth0 (Microsoft Kernel Debug Network Adapter)
+Network interface is down: name:eth1 (Intel(R) Ethernet 10G 2P X520-k bNDC #2)
+Possible IP Address: eth2 (Intel(R) Ethernet 10G 2P X520-k bNDC), 128.208.43.183
+Possible IP Address: eth2 (Intel(R) Ethernet 10G 2P X520-k bNDC), fe80:0:0:0:657d:854e:deaa:9a71%eth2
+Network interface is down: name:eth3 (Intel(R) Ethernet 10G X520 LOM)
+Network interface is down: name:eth4 (Intel(R) Ethernet 10G X520 LOM #2)
+Network interface is down: name:eth5 (Intel(R) Ethernet 10G 2P X520-k bNDC-WFP Native MAC Layer LightWeight Filter-0000)
+Network interface is down: name:eth6 (Intel(R) Ethernet 10G 2P X520-k bNDC-QoS Packet Scheduler-0000)
+Network interface is down: name:eth7 (Intel(R) Ethernet 10G 2P X520-k bNDC-WFP 802.3 MAC Layer LightWeight Filter-0000)
+On localhost/127.0.0.1 some of the required ports 11113, 11114 are not available, change -port PORT and try again. 
+[1] "localhost"
+[1] 11113
+[1] TRUE
+[1] -1
+[1] "Empty reply from server"
+Error in h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem,  : 
+  H2O failed to start, stopping execution.
+Execution halted

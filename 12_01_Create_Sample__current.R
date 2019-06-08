@@ -4,7 +4,7 @@ cat('# ------------------------------------------------------', '\n')
 
 cat('# Taking a sample of rentals ... ', '\n')
 {
-  num.rentals = 40
+  num.rentals = 100
   cat('# Number of rentals in sample = ', num.rentals, '\n')
 }
 

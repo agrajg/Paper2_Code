@@ -13,6 +13,9 @@ REM "C:\Program Files (x86)\Stata15\StataMP-64.exe" /e do 	"00_00_Transfering_Fi
 
 "C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"00_00_Preamble__current.R"
 REM "C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"01_01_Reading_CSV_and_Saving_Data__current.R"
-"C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"21_01_Format_Reviews_Data_MAIN__current.R"
+"C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"60_00_H2O_Standalone_MAIN.R"
+"C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"61_00_H2O_Standalone_MAIN.R"
+"C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"62_00_H2O_Standalone_MAIN.R"
+"C:\Program Files\R\R-3.5.3\bin\R.exe" CMD BATCH 		"63_00_H2O_Standalone_MAIN.R"
 
 pause

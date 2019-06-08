@@ -1,0 +1,304 @@
+
+R version 3.5.3 (2019-03-11) -- "Great Truth"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> cat('* Clear all work space ... ', '\n')
+* Clear all work space ...  
+> rm(list = ls())
+> 
+> cat('* Specify and begin h2o on stand alone machine ... ', '\n')
+* Specify and begin h2o on stand alone machine ...  
+> {  
++   n.threads = -1
++   port.num = 11112
++   max.mem = '550G'
++   force.DL = FALSE
++   library(h2o)
++   h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem, forceDL = force.DL)
++   cat('* clean H2O slate - just in case the cluster was already running', '\n')
++   h2o.removeAll() 
++   h2o.ls()
++ }
+
+----------------------------------------------------------------------
+
+Your next step is to start H2O:
+    > h2o.init()
+
+For H2O package documentation, ask for help:
+    > ??h2o
+
+After starting H2O, you can use the Web UI at http://localhost:54321
+For more information visit http://docs.h2o.ai
+
+----------------------------------------------------------------------
+
+
+Attaching package: 'h2o'
+
+The following objects are masked from 'package:stats':
+
+    cor, sd, var
+
+The following objects are masked from 'package:base':
+
+    %*%, %in%, &&, ||, apply, as.factor, as.numeric, colnames,
+    colnames<-, ifelse, is.character, is.factor, is.numeric, log,
+    log10, log1p, log2, round, signif, trunc
+
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\TEMP\35\Rtmp6z1U0x/h2o_agrajg_started_from_r.out
+    C:\TEMP\35\Rtmp6z1U0x/h2o_agrajg_started_from_r.err
+
+java version "1.8.0_211"
+Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
+
+Starting H2O JVM and connecting: . Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         1 seconds 686 milliseconds 
+    H2O cluster timezone:       America/Los_Angeles 
+    H2O data parsing timezone:  UTC 
+    H2O cluster version:        3.24.0.3 
+    H2O cluster version age:    1 month and 1 day  
+    H2O cluster name:           H2O_started_from_R_agrajg_hty934 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   488.89 GB 
+    H2O cluster total cores:    36 
+    H2O cluster allowed cores:  36 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        11112 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    H2O API Extensions:         Amazon S3, Algos, AutoML, Core V3, Core V4 
+    R Version:                  R version 3.5.3 (2019-03-11) 
+
+* clean H2O slate - just in case the cluster was already running 
+[1] 0
+[1] key
+<0 rows> (or 0-length row.names)
+> 
+> cat('* Call the DML main program ... ', '\n')
+* Call the DML main program ...  
+> {
++   source(file = '61_00_DML_Main.R')
++ }
+* Begin Running file :  DML_Main.R   ... 
+* -------------------------------------------- 
+* Load_Libraries ... 
+Loading required package: iterators
+Loading required package: parallel
+Loading required package: sandwich
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+The following object is masked from 'package:slam':
+
+    rollup
+
+The following objects are masked from 'package:h2o':
+
+    hour, month, week, year
+
+* Take all inputs ... 
+* I/O Setup ... 
+* Output files begin with :  61_00 
+* Output files end with :  2019_06_08_13_10_53 
+* FILE : 61_00_Set_project_paths_and_create_folders.R 
+* SET PROJECT PATH ...  
+[1] "R Project path set to:  Y:/agrajg/Research/Paper2/"
+* Create new folders if non-exist 
+* Importing and preparing the data for DML. 
+- Maximum text features to use =  10000 
+* FILE : 61_00_Setting_up_data.R 
+# Load data on H2O 
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_Demand_panel_DT.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490    34
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+              key
+1 Demand_panel_DT
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_1.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   202
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_201.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   200
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_401.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   217
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_601.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   234
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_801.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   150
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_1001.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   243
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_1201.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   166
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_1401.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   404
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_text_panel_DT_1601.csv  DOES NOT EXIST. 
+                 key
+1    Demand_panel_DT
+2    text_panel_DT_1
+3 text_panel_DT_1001
+4 text_panel_DT_1201
+5 text_panel_DT_1401
+6  text_panel_DT_201
+7  text_panel_DT_401
+8  text_panel_DT_601
+9  text_panel_DT_801
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_allchar_panel_DT.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490    59
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+                  key
+1     Demand_panel_DT
+2    allchar_panel_DT
+3     text_panel_DT_1
+4  text_panel_DT_1001
+5  text_panel_DT_1201
+6  text_panel_DT_1401
+7   text_panel_DT_201
+8   text_panel_DT_401
+9   text_panel_DT_601
+10  text_panel_DT_801
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_bed_amenities_panel_DT_1.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   220
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_bed_amenities_panel_DT_201.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   247
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_bed_amenities_panel_DT_401.csv  DOES NOT EXIST. 
+                          key
+1             Demand_panel_DT
+2            allchar_panel_DT
+3    bed_amenities_panel_DT_1
+4  bed_amenities_panel_DT_201
+5             text_panel_DT_1
+6          text_panel_DT_1001
+7          text_panel_DT_1201
+8          text_panel_DT_1401
+9           text_panel_DT_201
+10          text_panel_DT_401
+11          text_panel_DT_601
+12          text_panel_DT_801
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_desc_panel_DT_1.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   209
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_desc_panel_DT_201.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   248
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_desc_panel_DT_401.csv  EXISTS. 
+  |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+# Dimension of this data :  
+[1] 22490   349
+# Add to the list Data_Set_List ...  
+# ^Importing done.  
+# File :  Y:/agrajg/Research/Paper2/Output/TEMP/ForH2O_DML/21_01_desc_panel_DT_601.csv  DOES NOT EXIST. 
+                          key
+1             Demand_panel_DT
+2            allchar_panel_DT
+3    bed_amenities_panel_DT_1
+4  bed_amenities_panel_DT_201
+5             desc_panel_DT_1
+6           desc_panel_DT_201
+7           desc_panel_DT_401
+8             text_panel_DT_1
+9          text_panel_DT_1001
+10         text_panel_DT_1201
+11         text_panel_DT_1401
+12          text_panel_DT_201
+13          text_panel_DT_401
+14          text_panel_DT_601
+15          text_panel_DT_801
+# Length of the list containing all the data :  15 
+Binding data by columns 
+# Final data dimensions :  
+[1] 22490  3182
+# Creating relevant variables for DML. 
+# Making data nice and ready ...  
+# Y ... 
+# D ... 

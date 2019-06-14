@@ -5,7 +5,7 @@ cat('* Specify and begin h2o on stand alone machine ... ', '\n')
 {  
   n.threads = -1
   port.num = 11113
-  max.mem = '550G'
+  max.mem = '4096G'
   force.DL = FALSE
   library(h2o)
   h2o.init(port = port.num, nthreads = n.threads, max_mem_size = max.mem, forceDL = force.DL)

@@ -114,7 +114,8 @@ cat('# Creating a bench mark panel sorted by property id and date ... ')
     
     cat('# Begin for loop.', '\n')
     cat('# ---------------', '\n')
-    for(i in seq(from = 1, to = nfeat(review.tokens.dfm_trim.tfidf), by = 200)){
+    for(i in seq(from = 1, to = min(nfeat(review.tokens.dfm_trim.tfidf), max.features), by = 200)){
+    # for(i in seq(from = 1, to = nfeat(review.tokens.dfm_trim.tfidf), by = 200)){
       cat('# For loop begins ... ', '\n')
       cat('# Features from ', i , ' to ', (i+199), ' ... ' ,'\n')
       

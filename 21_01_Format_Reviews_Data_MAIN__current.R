@@ -8,6 +8,8 @@ file.time <- Sys.time()
 
 cat('# Packages needed in this program', '\n')
 {
+  # install.packages(c("slam", "foreach","doParallel","parallel","stringr","stringi","gmm","tidyr","dplyr","data.table","Matrix","magrittr","quanteda","tm","SnowballC","devtools","rlang","ggplot2"), dep = T)
+  
   library(slam)
   library(Matrix)
   library(ggplot2)
@@ -20,24 +22,26 @@ cat('# Packages needed in this program', '\n')
   library(quanteda)
   library(tm)
   library(SnowballC)
-  library(devtools)
+  # library(devtools)
   library(rlang)
 }
 
 cat('# data.table and quanteda options ...', '\n')
-{
-  # setDTthreads(threads = 0)
-  cat('# Data table threads set to ', getDTthreads(), '.', '\n')
-  quanteda_options(threads = detectCores() - 4)
-  quanteda_options(language_stemmer = 'English')
+setDTthreads(percent = 95)
+cat('# Data table threads set to ', getDTthreads(), '.', '\n')
+quanteda_options(threads = detectCores() - 2)
+quanteda_options(language_stemmer = 'English')
+cat('# Quanteda options ...')
+print(quanteda_options())
 
-  cat('# Setting up stopwords list ... ', '\n')
-  language.list <- setdiff(getStemLanguages(),c("porter", "turkish"))
-  stopwords.list <- unlist(c(lapply(X = language.list, FUN = stopwords)), recursive = TRUE, use.names = TRUE)
-}
+cat('# Setting up stopwords list ... ', '\n')
+language.list <- setdiff(getStemLanguages(),c("porter", "turkish"))
+stopwords.list <- unlist(c(lapply(X = language.list, FUN = stopwords)), recursive = TRUE, use.names = TRUE)
+
 
 # Inputs
 min.doc.percent <- 0.1    # Percentage of documents the term should atleast exist.
+max.features <- 12000
 
 {
   cat('# FILE : 11_01_Loading_Demand_Review_Rental_Data__current.R ... ', '\n')

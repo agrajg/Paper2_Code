@@ -217,8 +217,9 @@ rental.data.bed_amenities <- rental.data.bed_amenities[order(propertyid)]
     
     cat('# Begin for loop.', '\n')
     cat('# ---------------', '\n')
-    for(i in seq(from = 1, to = nfeat(bed_amenities.tokens.dfm_trim.tfidf), by = 200)){
-      # i=1
+    for(i in seq(from = 1, to = min(nfeat(bed_amenities.tokens.dfm_trim.tfidf), max.features), by = 200)){
+    # for(i in seq(from = 1, to = nfeat(bed_amenities.tokens.dfm_trim.tfidf), by = 200)){
+        # i=1
       cat('# For loop begins ... ', '\n')
       cat('# Features from ', i , ' to ', (i+199), ' ... ' ,'\n')
       
@@ -528,8 +529,9 @@ rental.data.desc <- rental.data.desc[order(propertyid)]
     
     cat('# Begin for loop.', '\n')
     cat('# ---------------', '\n')
-    for(i in seq(from = 1, to = nfeat(desc.tokens.dfm_trim.tfidf), by = 200)){
-      # i=1
+    for(i in seq(from = 1, to = min(nfeat(desc.tokens.dfm_trim.tfidf),max.features), by = 200)){
+    # for(i in seq(from = 1, to = nfeat(desc.tokens.dfm_trim.tfidf), by = 200)){
+        # i=1
       cat('# For loop begins ... ', '\n')
       cat('# Features from ', i , ' to ', (i+199), ' ... ' ,'\n')
       
